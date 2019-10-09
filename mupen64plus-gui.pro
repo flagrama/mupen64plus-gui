@@ -30,7 +30,11 @@ SOURCES += main.cpp\
     keyselect.cpp \
     interface/sdl_key_converter.c \
     controllerdialog.cpp \
-    logviewer.cpp
+    logviewer.cpp \
+    interface/debugger.cpp \
+    debuggerdialog.cpp \
+    debuggerwidgets/debuggercommon.cpp \
+    debuggerwidgets/current_instruction_widget.cpp
 
 win32 {
 SOURCES += osal/osal_dynamiclib_win32.c \
@@ -76,11 +80,15 @@ HEADERS  += mainwindow.h \
     controllerdialog.h \
     keyselect.h \
     interface/sdl_key_converter.h \
-    logviewer.h
+    logviewer.h \
+    interface/debugger.h \
+    debuggerdialog.h \
+    debuggerwidgets/debuggercommon.h \
+    debuggerwidgets/current_instruction_widget.h
 
 FORMS    += mainwindow.ui
 
-QMAKE_INCDIR += api osal interface
+QMAKE_INCDIR += api osal interface debuggerwidgets
 
 CONFIG += c++11
 

@@ -76,6 +76,8 @@ private slots:
 
     void on_actionToggle_Speed_Limiter_triggered();
 
+    void on_actionDebugger_triggered();
+
     void on_actionView_Log_triggered();
 
     void on_actionVideo_Settings_triggered();
@@ -84,6 +86,7 @@ private:
     void updateOpenRecent();
     void updateGB(Ui::MainWindow *ui);
     void findRecursion(const QString &path, const QString &pattern, QStringList *result);
+    void updateDebuggerVisible();
     Ui::MainWindow *ui;
     QMenu * OpenRecent;
     int verbose;

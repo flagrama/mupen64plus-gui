@@ -33,6 +33,7 @@
 #include "cheat.h"
 #include "mainwindow.h"
 #include "logviewer.h"
+#include "debugger.h"
 
 /*********************************************************************************************************
  *  Callback functions from the core
@@ -256,6 +257,19 @@ m64p_error openROM(std::string filename)
     if ((*CoreDoCommand)(M64CMD_SET_MEDIA_LOADER, sizeof(media_loader), &media_loader) != M64ERR_SUCCESS)
     {
         DebugMessage(M64MSG_WARNING, "Couldn't set media loader, transferpak and GB carts will not work.");
+    }
+
+    if(g_CoreCapabilities & M64CAPS_DEBUGGER)
+    {
+        m64p_handle coreHandle = nullptr;
+        bool debugger = false;
+
+        (*ConfigOpenSection)("Core", &coreHandle);
+        debugger = (*ConfigGetParamBool)(coreHandle, "EnableDebugger");
+        if(debugger)
+        {
+            DebuggerSetupCallbacks();
+        }
     }
 
     /* Save the configuration file again, just in case a plugin has altered it.

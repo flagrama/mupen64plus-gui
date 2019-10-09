@@ -17,12 +17,14 @@
 #include "cheatdialog.h"
 #include "controllerdialog.h"
 #include "logviewer.h"
+#include "debuggerdialog.h"
 
 #define RECENT_SIZE 10
 OGLWindow *my_window = nullptr;
 WorkerThread *workerThread = nullptr;
 LogViewer *logViewer = nullptr;
 QSettings *settings = nullptr;
+DebuggerDialog *debugger = nullptr;
 
 void MainWindow::resetTitle()
 {
@@ -502,6 +504,7 @@ void MainWindow::openROM(QString filename)
     workerThread = new WorkerThread();
     workerThread->setFileName(filename);
     workerThread->start();
+    updateDebuggerVisible();
 
     QStringList list;
     if (settings->contains("RecentROMs"))
@@ -512,6 +515,24 @@ void MainWindow::openROM(QString filename)
         list.removeLast();
     settings->setValue("RecentROMs",list.join(";"));
     updateOpenRecent();
+}
+
+void MainWindow::updateDebuggerVisible()
+{
+    bool isDebuggerEnabled = false;
+    if(g_CoreCapabilities & M64CAPS_DEBUGGER)
+    {
+        m64p_handle coreHandle = nullptr;
+
+        (*ConfigOpenSection)("Core", &coreHandle);
+        isDebuggerEnabled = (*ConfigGetParamBool)(coreHandle, "EnableDebugger");
+        debugger = new DebuggerDialog();
+    }
+
+    QList<QAction*> actions = ui->menuEmulation->actions();
+    for(int i = 0; i < actions.count(); i++)
+        if(actions.at(i)->objectName() == "actionDebugger")
+            actions.at(i)->setVisible(isDebuggerEnabled);
 }
 
 void MainWindow::on_actionOpen_ROM_triggered()
@@ -679,6 +700,11 @@ void MainWindow::on_actionToggle_Speed_Limiter_triggered()
 void MainWindow::on_actionView_Log_triggered()
 {
     logViewer->show();
+}
+
+void MainWindow::on_actionDebugger_triggered()
+{
+    debugger->show();
 }
 
 void MainWindow::on_actionVideo_Settings_triggered()
