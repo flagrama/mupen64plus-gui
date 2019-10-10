@@ -18,6 +18,7 @@ CodeWidget::CodeWidget()
     setEditTriggers(QAbstractItemView::NoEditTriggers);
     setSelectionMode(QAbstractItemView::NoSelection);
     setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    setAutoScroll(false);
     setFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
     connect(this, SIGNAL(cellClicked(int, int)), this, SLOT(cellClicked(int, int)));
     Update();
@@ -28,14 +29,14 @@ void CodeWidget::Update()
     if(rowCount() == 0)
         setRowCount(1);
 
-    int rows = std::round((height() / static_cast<float>(rowHeight(0))) - 0.25) + 1;
+    int rows = std::round((height() / static_cast<float>(rowHeight(0))) - 0.25);
     setRowCount(rows);
 
     for(int row = 0; row < rowCount(); row++)
     {
         char op[64], args[64];
         QString qs_args, qs_args_addr;
-        const uint32_t addr = m_address - ((rowCount() / 2) * 4) + row * 4;;
+        const uint32_t addr = m_address - ((rowCount() / 2) * 4) + row * 4;
         if(DebuggerGetMemory(addr) != M64P_MEM_INVALID)
         {
             DebuggerGetInstruction(op, args, addr);
