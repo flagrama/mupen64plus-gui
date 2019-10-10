@@ -425,6 +425,7 @@ void MainWindow::closeEvent (QCloseEvent *event)
     settings->setValue("windowState", saveState());
 
     event->accept();
+    closeDebugger();
 }
 
 void MainWindow::updateOpenRecent()
@@ -520,19 +521,40 @@ void MainWindow::openROM(QString filename)
 void MainWindow::updateDebuggerVisible()
 {
     bool isDebuggerEnabled = false;
+    bool isInterpreter = false;
     if(g_CoreCapabilities & M64CAPS_DEBUGGER)
     {
         m64p_handle coreHandle = nullptr;
 
         (*ConfigOpenSection)("Core", &coreHandle);
+        isInterpreter = ((*ConfigGetParamInt)(coreHandle, "R4300Emulator")) == 0;
         isDebuggerEnabled = (*ConfigGetParamBool)(coreHandle, "EnableDebugger");
-        debugger = new DebuggerDialog();
+        if(isDebuggerEnabled && isInterpreter)
+            if(debugger == nullptr)
+                debugger = new DebuggerDialog();
     }
 
     QList<QAction*> actions = ui->menuEmulation->actions();
     for(int i = 0; i < actions.count(); i++)
         if(actions.at(i)->objectName() == "actionDebugger")
-            actions.at(i)->setVisible(isDebuggerEnabled);
+            actions.at(i)->setVisible(isDebuggerEnabled && isInterpreter);
+}
+
+void MainWindow::closeDebugger()
+{
+    if(debugger != nullptr)
+    {
+        debugger->close();
+        delete debugger;
+        debugger = nullptr;
+        (*DebugSetCallbacks)(nullptr, nullptr, nullptr);
+        (*DebugSetRunState)(M64P_DBG_RUNSTATE_PAUSED); // Hack to ensure run loop ends
+    }
+
+    QList<QAction*> actions = ui->menuEmulation->actions();
+    for(int i = 0; i < actions.count(); i++)
+        if(actions.at(i)->objectName() == "actionDebugger")
+            actions.at(i)->setVisible(false);
 }
 
 void MainWindow::on_actionOpen_ROM_triggered()
@@ -556,6 +578,7 @@ void MainWindow::on_actionStop_Game_triggered()
 {
     if (QtAttachCoreLib())
         (*CoreDoCommand)(M64CMD_STOP, 0, NULL);
+    closeDebugger();
 }
 
 void MainWindow::on_actionExit_triggered()

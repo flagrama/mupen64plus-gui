@@ -262,14 +262,21 @@ m64p_error openROM(std::string filename)
     if(g_CoreCapabilities & M64CAPS_DEBUGGER)
     {
         m64p_handle coreHandle = nullptr;
-        bool debugger = false;
+        bool isDebuggerEnabled = false;
+        bool isInterpreter = false;
 
         (*ConfigOpenSection)("Core", &coreHandle);
-        debugger = (*ConfigGetParamBool)(coreHandle, "EnableDebugger");
-        if(debugger)
+        isInterpreter = ((*ConfigGetParamInt)(coreHandle, "R4300Emulator")) == 0;
+        isDebuggerEnabled = (*ConfigGetParamBool)(coreHandle, "EnableDebugger");
+        if(isDebuggerEnabled && isInterpreter)
         {
             DebuggerSetupCallbacks();
         }
+        else
+        {
+            (*DebugSetCallbacks)(nullptr, nullptr, nullptr);
+        }
+        
     }
 
     /* Save the configuration file again, just in case a plugin has altered it.

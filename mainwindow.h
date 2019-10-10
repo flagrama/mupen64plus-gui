@@ -87,6 +87,7 @@ private:
     void updateGB(Ui::MainWindow *ui);
     void findRecursion(const QString &path, const QString &pattern, QStringList *result);
     void updateDebuggerVisible();
+    void closeDebugger();
     Ui::MainWindow *ui;
     QMenu * OpenRecent;
     int verbose;
