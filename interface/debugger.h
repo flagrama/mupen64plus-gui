@@ -9,6 +9,10 @@ void DebuggerSetupCallbacks();
 void DebuggerSetRunState(m64p_dbg_runstate);
 m64p_dbg_runstate DebuggerGetRunState();
 int DebuggerGetInstruction(char* op, char* args, uint32_t addr = 0);
+uint32_t DebuggerGetMemory(uint32_t addr, int size = 32);
+int DebuggerSetBreakpoint(uint32_t addr, int type = 0);
+int DebuggerGetBreakpoint(uint32_t addr, int type = 0);
+void DebuggerRemoveBreakpoint(int index);
 
 extern bool l_DebugLoopWait;
 extern uint32_t l_DebugProgramCounter;

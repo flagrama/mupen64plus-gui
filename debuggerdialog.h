@@ -14,11 +14,19 @@ private slots:
     void RunClicked();
     void BreakClicked();
     void StepClicked();
+    void ForceUpdate();
 
 private:
+    QWidget *dataWidget;
     QPushButton *runButton;
     QPushButton *breakButton;
     QPushButton *stepButton;
+
+    void PausedLayout();
+    void RunningLayout();
+
+signals:
+    void Update(uint32_t addr);
 };
 
 #endif

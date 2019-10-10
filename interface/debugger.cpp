@@ -5,6 +5,8 @@
 uint32_t l_DebugProgramCounter = 0;
 int l_DebugStepsPending = 0;
 bool l_DebugLoopWait = false;
+static m64p_breakpoint *l_DebugBreakpoints;
+static int l_DebugNumBreakpoints = 0;
 
 void DebuggerStep()
 {
@@ -16,6 +18,8 @@ void DebuggerStep()
 void DebuggerInit()
 {
     DebuggerSetRunState(M64P_DBG_RUNSTATE_RUNNING);
+    if(l_DebugNumBreakpoints == 0)
+        l_DebugBreakpoints = static_cast<m64p_breakpoint*>(malloc(BREAKPOINTS_MAX_NUMBER * sizeof(m64p_breakpoint)));
 }
 
 void DebuggerUpdate(uint32_t pc)
@@ -72,4 +76,74 @@ int DebuggerGetInstruction(char op[64], char args[64], uint32_t addr)
     if(op[0] == 'b' || op[0] == 'j')
         return 2;
     return 1;
+}
+
+uint32_t DebuggerGetMemory(uint32_t addr, int size)
+{
+    if(size != 32)
+    {
+        DebugMessage(M64MSG_WARNING, "Memory size not implemented.");
+        return 0x0;
+    }
+
+    return (*DebugMemRead32)(addr);
+}
+
+int DebuggerSetBreakpoint(uint32_t addr, int type)
+{
+    if(type != 0)
+    {
+        DebugMessage(M64MSG_WARNING, "Breakpoint type not implemented.");
+        return -1;
+    }
+
+    if(type == 0)
+    {
+        m64p_breakpoint breakpoint;
+        breakpoint.address = addr;
+        breakpoint.endaddr = addr;
+        breakpoint.flags = M64P_BKP_FLAG_ENABLED | M64P_BKP_FLAG_EXEC;
+
+        int numBreakpoints = (*DebugBreakpointCommand)(M64P_BKP_CMD_ADD_STRUCT, 0, &breakpoint);
+        if(numBreakpoints == -1)
+            return -1;
+        
+        l_DebugBreakpoints[l_DebugNumBreakpoints] = breakpoint;
+        l_DebugNumBreakpoints++;
+        return l_DebugNumBreakpoints - 1;
+    }
+
+    return -1;
+}
+
+int DebuggerGetBreakpoint(uint32_t addr, int type)
+{
+    if(type != 0)
+    {
+        DebugMessage(M64MSG_WARNING, "Breakpoint type not implemented.");
+        return -1;
+    }
+
+    if(type == 0)
+    {
+        for (int i = 0; i < l_DebugNumBreakpoints; i++) {
+            if (l_DebugBreakpoints[i].address == addr)
+                return i;
+        }
+        return -1;
+    }
+
+    return -1;
+}
+
+void DebuggerRemoveBreakpoint(int index)
+{
+    if(index < 0 || index >= l_DebugNumBreakpoints)
+        return;
+    (*DebugBreakpointCommand)(M64P_BKP_CMD_REMOVE_IDX, index, NULL);
+    l_DebugNumBreakpoints--;
+
+    for (int j = index + 1; j < l_DebugNumBreakpoints; j++) {
+        l_DebugBreakpoints[j - 1] = l_DebugBreakpoints[j];
+    }
 }

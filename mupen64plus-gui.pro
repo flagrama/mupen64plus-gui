@@ -34,7 +34,8 @@ SOURCES += main.cpp\
     interface/debugger.cpp \
     debuggerdialog.cpp \
     debuggerwidgets/debuggercommon.cpp \
-    debuggerwidgets/current_instruction_widget.cpp
+    debuggerwidgets/current_instruction_widget.cpp \
+    debuggerwidgets/code_widget.cpp
 
 win32 {
 SOURCES += osal/osal_dynamiclib_win32.c \
@@ -84,7 +85,8 @@ HEADERS  += mainwindow.h \
     interface/debugger.h \
     debuggerdialog.h \
     debuggerwidgets/debuggercommon.h \
-    debuggerwidgets/current_instruction_widget.h
+    debuggerwidgets/current_instruction_widget.h \
+    debuggerwidgets/code_widget.h
 
 FORMS    += mainwindow.ui
 

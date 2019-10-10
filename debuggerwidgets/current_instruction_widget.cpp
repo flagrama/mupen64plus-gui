@@ -4,7 +4,6 @@
 
 #include <QVBoxLayout>
 #include <QFontDatabase>
-#include <QCoreApplication>
 
 CurrentInstructionWidget::CurrentInstructionWidget()
 {
@@ -33,8 +32,6 @@ CurrentInstructionWidget::CurrentInstructionWidget()
 
 void CurrentInstructionWidget::UpdateCurrentInstruction()
 {
-    while(l_DebugLoopWait)
-        QCoreApplication::processEvents();
     delaySlot->hide();
     int instructionType;
 
