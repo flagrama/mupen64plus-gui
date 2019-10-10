@@ -1,5 +1,5 @@
-#ifndef CODE_WIDGET_H
-#define CODE_WIDGET_H
+#ifndef MEMORY_WIDGET_H
+#define MEMORY_WIDGET_H
 
 #include "m64p_types.h"
 
@@ -7,23 +7,20 @@
 #include <QWheelEvent>
 #include <QResizeEvent>
 
-class CodeWidget : public QTableWidget
+class MemoryWidget : public QTableWidget
 {
     Q_OBJECT
 
 public:
-    CodeWidget();
+    MemoryWidget();
 
 public slots:
-    void SetAddress(uint32_t addr);
-
-private slots:
-    void cellClicked(int, int);
+    void Update();
 
 private:
     uint32_t m_address = 0x00000000;
+    int m_columnWidth = 0;
 
-    void Update();
     void resizeEvent(QResizeEvent*);
     void wheelEvent(QWheelEvent* event);
 };

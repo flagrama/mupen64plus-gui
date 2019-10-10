@@ -2,6 +2,7 @@
 #include "debugger.h"
 #include "current_instruction_widget.h"
 #include "code_widget.h"
+#include "memory_widget.h"
 
 #include <QPushButton>
 #include <QVBoxLayout>
@@ -34,8 +35,12 @@ DebuggerDialog::DebuggerDialog()
 
     CodeWidget *codeWidget = new CodeWidget();
     connect(this, SIGNAL(Update(uint32_t)), codeWidget, SLOT(SetAddress(uint32_t)));
+    MemoryWidget *memoryWidget = new MemoryWidget();
+    connect(this, SIGNAL(Update(uint32_t)), memoryWidget, SLOT(Update()));
+
     QTabWidget *dataTabs = new QTabWidget();
     dataTabs->addTab(codeWidget, "Code");
+    dataTabs->addTab(memoryWidget, "Memory");
     QVBoxLayout *dataLayout = new QVBoxLayout();
     dataLayout->addWidget(dataTabs);
 
