@@ -13,6 +13,7 @@ uint32_t DebuggerGetMemory(uint32_t addr, int size = 32);
 int DebuggerSetBreakpoint(uint32_t addr, int type = 0);
 int DebuggerGetBreakpoint(uint32_t addr, int type = 0);
 void DebuggerRemoveBreakpoint(int index);
+void DebuggerRemoveAllBreakpoints();
 
 extern bool l_DebugLoopWait;
 extern uint32_t l_DebugProgramCounter;

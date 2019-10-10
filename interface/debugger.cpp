@@ -5,7 +5,7 @@
 uint32_t l_DebugProgramCounter = 0;
 int l_DebugStepsPending = 0;
 bool l_DebugLoopWait = false;
-static m64p_breakpoint *l_DebugBreakpoints;
+static m64p_breakpoint *l_DebugBreakpoints = nullptr;
 static int l_DebugNumBreakpoints = 0;
 
 void DebuggerStep()
@@ -18,8 +18,13 @@ void DebuggerStep()
 void DebuggerInit()
 {
     DebuggerSetRunState(M64P_DBG_RUNSTATE_RUNNING);
-    if(l_DebugNumBreakpoints == 0)
-        l_DebugBreakpoints = static_cast<m64p_breakpoint*>(malloc(BREAKPOINTS_MAX_NUMBER * sizeof(m64p_breakpoint)));
+    if(l_DebugBreakpoints != nullptr)
+    {
+        if(l_DebugNumBreakpoints != 0)
+            DebuggerRemoveAllBreakpoints();
+        delete l_DebugBreakpoints;
+    }
+    l_DebugBreakpoints = static_cast<m64p_breakpoint*>(malloc(BREAKPOINTS_MAX_NUMBER * sizeof(m64p_breakpoint)));
 }
 
 void DebuggerUpdate(uint32_t pc)
@@ -146,4 +151,13 @@ void DebuggerRemoveBreakpoint(int index)
     for (int j = index + 1; j < l_DebugNumBreakpoints; j++) {
         l_DebugBreakpoints[j - 1] = l_DebugBreakpoints[j];
     }
+}
+
+void DebuggerRemoveAllBreakpoints()
+{
+    if(l_DebugNumBreakpoints <= 0)
+        return;
+    for(int i = l_DebugNumBreakpoints; i > 0; i--)
+        (*DebugBreakpointCommand)(M64P_BKP_CMD_REMOVE_IDX, i, NULL);
+    l_DebugNumBreakpoints = 0;
 }
