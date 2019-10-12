@@ -37,11 +37,22 @@ DebuggerDialog::DebuggerDialog()
     connect(this, SIGNAL(Update(uint32_t)), codeWidget, SLOT(SetAddress(uint32_t)));
     MemoryWidget *memoryWidget = new MemoryWidget();
     connect(this, SIGNAL(Update(uint32_t)), memoryWidget, SLOT(Update()));
+    connect(this, SIGNAL(GoToMemory(uint32_t)), memoryWidget, SLOT(SetAddress(uint32_t)));
+    connect(this, SIGNAL(FindMemory(QString)), memoryWidget, SLOT(Search(QString)));
+    connect(memoryWidget, SIGNAL(SearchCompleted()), this, SLOT(ForceUpdate()));
 
     QTabWidget *dataTabs = new QTabWidget();
     dataTabs->addTab(codeWidget, "Code");
     dataTabs->addTab(memoryWidget, "Memory");
+
+    searchWidget = new SearchWidget();
+    searchWidget->setGoToVisible(true);
+    connect(dataTabs, SIGNAL(tabBarClicked(int)), this, SLOT(UpdateSearchWidget(int)));
+    connect(searchWidget, SIGNAL(goTo(uint32_t)), this, SLOT(GoTo(uint32_t)));
+    connect(searchWidget, SIGNAL(search(QString)), this, SLOT(Search(QString)));
+
     QVBoxLayout *dataLayout = new QVBoxLayout();
+    dataLayout->addWidget(searchWidget);
     dataLayout->addWidget(dataTabs);
 
     dataWidget = new QWidget();
@@ -101,6 +112,39 @@ void DebuggerDialog::StepClicked()
 void DebuggerDialog::ForceUpdate()
 {
     PausedLayout();
+}
+
+void DebuggerDialog::UpdateSearchWidget(int index)
+{
+    currentTab = static_cast<DebuggerTabs>(index);
+    if(index == DebuggerTabs::CODE_TAB)
+    {
+        searchWidget->setSearchVisible(false);
+        searchWidget->setGoToVisible(true);
+    }
+    if(index == DebuggerTabs::MEMORY_TAB)
+    {
+        searchWidget->setSearchVisible(true);
+        searchWidget->setGoToVisible(true);
+    }
+}
+
+void DebuggerDialog::Search(QString query)
+{
+    if(currentTab == DebuggerTabs::MEMORY_TAB)
+    {
+        RunningLayout();
+        breakButton->setDisabled(true);
+        emit FindMemory(query);
+    }
+}
+
+void DebuggerDialog::GoTo(uint32_t address)
+{
+    if(currentTab == DebuggerTabs::CODE_TAB)
+        emit Update(address);
+    if(currentTab == DebuggerTabs::MEMORY_TAB)
+        emit GoToMemory(address);
 }
 
 void DebuggerDialog::PausedLayout()

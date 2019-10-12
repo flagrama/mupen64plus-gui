@@ -16,6 +16,11 @@ public:
 
 public slots:
     void Update();
+    void Search(QString);
+    void SetAddress(uint32_t);
+
+signals:
+    void SearchCompleted();
 
 private:
     uint32_t m_address = 0x00000000;

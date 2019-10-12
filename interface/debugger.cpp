@@ -83,15 +83,21 @@ int DebuggerGetInstruction(char op[64], char args[64], uint32_t addr)
     return 1;
 }
 
-uint32_t DebuggerGetMemory(uint32_t addr, int size)
+uint64_t DebuggerGetMemory(uint32_t addr, int size)
 {
-    if(size != 32)
+    if(size == 32)
+    {
+        return (*DebugMemRead32)(addr);
+    }
+    else if(size == 64)
+    {
+        return (*DebugMemRead64)(addr);
+    }
+    else
     {
         DebugMessage(M64MSG_WARNING, "Memory size not implemented.");
         return 0x0;
     }
-
-    return (*DebugMemRead32)(addr);
 }
 
 int DebuggerSetBreakpoint(uint32_t addr, int type)

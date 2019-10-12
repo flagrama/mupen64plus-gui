@@ -3,10 +3,13 @@
 #include "debuggercommon.h"
 
 #include <cmath>
+#include <sstream>
 #include <QHeaderView>
 #include <QAbstractItemView>
 #include <QFontDatabase>
 #include <QString>
+#include <QCoreApplication>
+#include <QGuiApplication>
 
 MemoryWidget::MemoryWidget()
 {
@@ -43,7 +46,7 @@ void MemoryWidget::Update()
 
     for(int row = 0; row < rowCount(); row++)
     {
-        const uint32_t addr = m_address - ((rowCount() / 2) * (columnCount() - 1)) + row * (columnCount() - 1);
+        const uint32_t addr = m_address - ((rowCount() / 2) * (columnCount() - 1) * 4) + row * (columnCount() - 1) * 4;
         auto* addrItem = new QTableWidgetItem(QString("%1").arg(addr, 8, 16, QChar('0')).toUpper());
         if(addr == m_address)
             addrItem->setBackgroundColor(Qt::yellow);
@@ -51,7 +54,7 @@ void MemoryWidget::Update()
             addrItem->setBackgroundColor(Qt::gray);
         setItem(row, 0, addrItem);
         resizeRowToContents(row);
-        for(int col = 1; col < columnCount(); col++)
+        for(int col = 0; col < columnCount(); col++)
         {
             uint32_t value = DebuggerGetMemory(addr + col * 4);
             QString qs_value;
@@ -61,9 +64,39 @@ void MemoryWidget::Update()
                 qs_value = QString("-");
             auto* memoryItem = new QTableWidgetItem(qs_value);
             memoryItem->setTextAlignment(Qt::AlignCenter);
-            setItem(row, col, memoryItem);
+            setItem(row, col + 1, memoryItem);
         }
     }
+}
+
+void MemoryWidget::SetAddress(uint32_t address)
+{
+    if(m_address == address)
+        return;
+    m_address = address;
+    Update();
+}
+
+void MemoryWidget::Search(QString query)
+{
+    uint32_t addr = m_address;
+    QGuiApplication::setOverrideCursor(Qt::CursorShape::WaitCursor);
+    for(uint32_t i = 0; i < 0x2000000; i++)
+    {
+        addr += 8;
+        QCoreApplication::processEvents();
+        uint64_t value = DebuggerGetMemory(addr, 64);
+        if(value == M64P_MEM_INVALID)
+            continue;
+        std::stringstream stream;
+        stream << std::hex << value;
+        std::string s_value( stream.str() );
+        if(s_value.find(query.toLower().toStdString()) != std::string::npos)
+            break;
+    }
+    SetAddress(addr);
+    QGuiApplication::setOverrideCursor(Qt::CursorShape::ArrowCursor);
+    emit SearchCompleted();
 }
 
 void MemoryWidget::resizeEvent(QResizeEvent*)
@@ -77,6 +110,6 @@ void MemoryWidget::wheelEvent(QWheelEvent* event)
 
     if(delta == 0)
         return;
-    m_address += delta * (columnCount() - 1);
+    m_address += delta * (columnCount() - 1) * 4;
     Update();
 }
