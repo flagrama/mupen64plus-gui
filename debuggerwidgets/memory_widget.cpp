@@ -45,12 +45,15 @@ void MemoryWidget::Update()
     {
         const uint32_t addr = m_address - ((rowCount() / 2) * (columnCount() - 1)) + row * (columnCount() - 1);
         auto* addrItem = new QTableWidgetItem(QString("%1").arg(addr, 8, 16, QChar('0')).toUpper());
-        addrItem->setBackgroundColor(Qt::gray);
+        if(addr == m_address)
+            addrItem->setBackgroundColor(Qt::yellow);
+        else
+            addrItem->setBackgroundColor(Qt::gray);
         setItem(row, 0, addrItem);
         resizeRowToContents(row);
         for(int col = 1; col < columnCount(); col++)
         {
-            uint32_t value = DebuggerGetMemory(addr + col - 2);
+            uint32_t value = DebuggerGetMemory(addr + col * 4);
             QString qs_value;
             if(value != M64P_MEM_INVALID)
                 qs_value = QString("%1").arg(value, 8, 16, QChar('0')).toUpper();
