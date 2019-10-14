@@ -54,7 +54,7 @@ void CodeWidget::Update()
         auto* op_item = new QTableWidgetItem(QString(op).toUpper());
         auto* args_item = new QTableWidgetItem(QString("%1%2").arg(qs_args, qs_args_addr));
 
-        int breakpoint = DebuggerGetBreakpoint(addr);
+        int breakpoint = DebuggerGetBreakpoint(addr, M64P_BKP_FLAG_EXEC);
         if(breakpoint != -1) 
         {
             bkpt_item->setData(Qt::UserRole, breakpoint);
@@ -113,7 +113,7 @@ void CodeWidget::cellClicked(int row, int col)
     uint32_t addr = item(row, col + 1)->text().toUInt(nullptr, 16);
     if(breakpoint->backgroundColor() != Qt::red)
     {
-        int index = DebuggerSetBreakpoint(addr);
+        int index = DebuggerSetBreakpoint(addr, M64P_BKP_FLAG_EXEC);
         if(index == -1)
             return;
         breakpoint->setData(Qt::UserRole, index);

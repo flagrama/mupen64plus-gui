@@ -7,17 +7,19 @@
 #include <QWheelEvent>
 #include <QResizeEvent>
 
+enum MemoryData
+{
+    ADDRESS = Qt::UserRole,
+    BREAKPOINT_FLAGS,
+    BREAKPOINT_INDEX
+};
+
 class MemoryWidget : public QTableWidget
 {
     Q_OBJECT
 
 public:
     MemoryWidget();
-
-public slots:
-    void Update();
-    void Search(QString);
-    void SetAddress(uint32_t);
 
 signals:
     void SearchCompleted();
@@ -28,6 +30,14 @@ private:
 
     void resizeEvent(QResizeEvent*);
     void wheelEvent(QWheelEvent* event);
+
+public slots:
+    void Update();
+    void Search(QString);
+    void SetAddress(uint32_t);
+
+private slots:
+    void ContextMenu();
 };
 
 #endif

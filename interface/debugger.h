@@ -10,8 +10,8 @@ void DebuggerSetRunState(m64p_dbg_runstate);
 m64p_dbg_runstate DebuggerGetRunState();
 int DebuggerGetInstruction(char* op, char* args, uint32_t addr = 0);
 uint64_t DebuggerGetMemory(uint32_t addr, int size = 32);
-int DebuggerSetBreakpoint(uint32_t addr, int type = 0);
-int DebuggerGetBreakpoint(uint32_t addr, int type = 0);
+int DebuggerSetBreakpoint(uint32_t addr, m64p_dbg_bkp_flags flags);
+int DebuggerGetBreakpoint(uint32_t addr, m64p_dbg_bkp_flags flags);
 void DebuggerRemoveBreakpoint(int index);
 void DebuggerRemoveAllBreakpoints();
 

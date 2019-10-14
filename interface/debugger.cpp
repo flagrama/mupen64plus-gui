@@ -100,48 +100,63 @@ uint64_t DebuggerGetMemory(uint32_t addr, int size)
     }
 }
 
-int DebuggerSetBreakpoint(uint32_t addr, int type)
+int DebuggerSetBreakpoint(uint32_t addr, m64p_dbg_bkp_flags flags)
 {
-    if(type != 0)
+    m64p_breakpoint breakpoint;
+    if(flags & (M64P_BKP_FLAG_READ | M64P_BKP_FLAG_WRITE) && addr >= 0x80000000 && addr < 0x90000000)
     {
-        DebugMessage(M64MSG_WARNING, "Breakpoint type not implemented.");
-        return -1;
+        breakpoint.address = addr - 0x80000000;
+        breakpoint.endaddr = addr - 0x80000000;
     }
-
-    if(type == 0)
+    else
     {
-        m64p_breakpoint breakpoint;
         breakpoint.address = addr;
         breakpoint.endaddr = addr;
-        breakpoint.flags = M64P_BKP_FLAG_ENABLED | M64P_BKP_FLAG_EXEC;
-
-        int numBreakpoints = (*DebugBreakpointCommand)(M64P_BKP_CMD_ADD_STRUCT, 0, &breakpoint);
-        if(numBreakpoints == -1)
-            return -1;
-        
-        l_DebugBreakpoints[l_DebugNumBreakpoints] = breakpoint;
-        l_DebugNumBreakpoints++;
-        return l_DebugNumBreakpoints - 1;
     }
+    breakpoint.flags = (M64P_BKP_FLAG_ENABLED | flags);
 
-    return -1;
+    int numBreakpoints = (*DebugBreakpointCommand)(M64P_BKP_CMD_ADD_STRUCT, 0, &breakpoint);
+    if(numBreakpoints == -1)
+        return -1;
+    
+    l_DebugBreakpoints[l_DebugNumBreakpoints] = breakpoint;
+    l_DebugNumBreakpoints++;
+    return l_DebugNumBreakpoints - 1;
 }
 
-int DebuggerGetBreakpoint(uint32_t addr, int type)
+int DebuggerGetBreakpoint(uint32_t addr, m64p_dbg_bkp_flags flags)
 {
-    if(type != 0)
+    flags = m64p_dbg_bkp_flags(flags | M64P_BKP_FLAG_ENABLED); // Disabling breakpoints not implemented
+    if(flags == M64P_BKP_FLAG_ENABLED)
     {
-        DebugMessage(M64MSG_WARNING, "Breakpoint type not implemented.");
-        return -1;
+        uint32_t memAddr = addr;
+        if(addr >= 0x80000000 && addr < 0x90000000)
+            memAddr = addr - 0x80000000;
+        for(int i = 0; i < l_DebugNumBreakpoints; i++)
+        {
+            if(l_DebugBreakpoints[i].address == memAddr)
+                return l_DebugBreakpoints[i].flags;
+        }
     }
-
-    if(type == 0)
+    else if(flags & M64P_BKP_FLAG_EXEC)
     {
-        for (int i = 0; i < l_DebugNumBreakpoints; i++) {
-            if (l_DebugBreakpoints[i].address == addr)
+        for(int i = 0; i < l_DebugNumBreakpoints; i++)
+        {
+            if(l_DebugBreakpoints[i].address == addr
+            && l_DebugBreakpoints[i].flags == m64p_dbg_bkp_flags(flags | M64P_BKP_FLAG_ENABLED))
                 return i;
         }
-        return -1;
+    }
+    else
+    {
+        uint32_t memAddr = addr;
+        if(addr >= 0x80000000 && addr < 0x90000000)
+            memAddr = addr - 0x80000000;
+        for(int i = 0; i < l_DebugNumBreakpoints; i++)
+        {
+            if(l_DebugBreakpoints[i].address == memAddr)
+                return i;
+        }
     }
 
     return -1;
