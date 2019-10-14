@@ -8,6 +8,7 @@
 enum DebuggerTabs
 {
     CODE_TAB,
+    REGISTER_TAB,
     MEMORY_TAB
 };
 

@@ -3,6 +3,7 @@
 #include "current_instruction_widget.h"
 #include "code_widget.h"
 #include "memory_widget.h"
+#include "registers_widget.h"
 
 #include <QPushButton>
 #include <QVBoxLayout>
@@ -35,6 +36,8 @@ DebuggerDialog::DebuggerDialog()
 
     CodeWidget *codeWidget = new CodeWidget();
     connect(this, SIGNAL(Update(uint32_t)), codeWidget, SLOT(SetAddress(uint32_t)));
+    RegistersWidget *registersWidget = new RegistersWidget();
+    connect(this, SIGNAL(Update(uint32_t)), registersWidget, SLOT(UpdateRegisters()));
     MemoryWidget *memoryWidget = new MemoryWidget();
     connect(this, SIGNAL(Update(uint32_t)), memoryWidget, SLOT(Update()));
     connect(this, SIGNAL(GoToMemory(uint32_t)), memoryWidget, SLOT(SetAddress(uint32_t)));
@@ -43,6 +46,7 @@ DebuggerDialog::DebuggerDialog()
 
     QTabWidget *dataTabs = new QTabWidget();
     dataTabs->addTab(codeWidget, "Code");
+    dataTabs->addTab(registersWidget, "Registers");
     dataTabs->addTab(memoryWidget, "Memory");
 
     searchWidget = new SearchWidget();
