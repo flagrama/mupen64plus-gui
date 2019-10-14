@@ -2,7 +2,7 @@
 
 void GetInstructionStrings(QString &qs_args, QString &qs_addr, char* args)
 {
-    std::string s_args, s_addr, s_offset;
+    std::string s_args, s_address, s_offset;
     s_args = args;
     uint64_t lastArgPos = s_args.find_last_of(',') + 1;
     uint64_t addressPos = s_args.find("0x", lastArgPos);
@@ -10,14 +10,14 @@ void GetInstructionStrings(QString &qs_args, QString &qs_addr, char* args)
     if(addressPos != std::string::npos)
     {
         addressPos += 2;
-        s_addr = s_args.substr(addressPos);
+        s_address = s_args.substr(addressPos);
         s_args = s_args.substr(0, addressPos);
     }
     
     //QString qs_addr;
-    if(!s_addr.empty())
+    if(!s_address.empty())
     {
-        qs_addr = QString("%1").arg(stol(s_addr, nullptr, 16), 4, 16, QChar('0')).toUpper();
+        qs_addr = QString("%1").arg(stol(s_address, nullptr, 16), 4, 16, QChar('0')).toUpper();
     }
     
     char* isLastArgNaN = nullptr;
