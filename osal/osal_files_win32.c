@@ -50,7 +50,7 @@ osal_lib_search *osal_library_search(const char *searchpath)
         return NULL;
     }
     sprintf(pchSearchPath, "%s\\*.dll", searchpath);
-    hDir = FindFirstFile(pchSearchPath, &entry);
+    hDir = FindFirstFileA(pchSearchPath, &entry);
     free(pchSearchPath);
     if (hDir == INVALID_HANDLE_VALUE)
         return NULL;
@@ -89,7 +89,7 @@ osal_lib_search *osal_library_search(const char *searchpath)
         /* set plugin_type and next pointer */
         curr->plugin_type = (m64p_plugin_type) 0;
         curr->next = NULL;
-    } while (FindNextFile(hDir, &entry));
+    } while (FindNextFileA(hDir, &entry));
 
     FindClose(hDir);
     return head;
